@@ -1,18 +1,47 @@
-// Helper to print/debug vk things
-// Don't make any VK calls in here
+// Utility only -- don't make any VK API calls in here
 
 #include <vulkan/vulkan.h>
 #include <string>
 #include <iostream>
 #include <utility>
 #include <type_traits>
+#include <optional>
+
+struct SwapChainDetails {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+
+    void print() {
+        std::cout << "\tSwap Chain Capabilities:\n";
+        std::cout << "\t\tMin ImageCount: " << capabilities.minImageCount << "\n";
+        std::cout << "\t\tMax ImageCount: " << capabilities.maxImageCount << "\n";
+        std::cout << "\t\tCurrent Extents: {" << capabilities.currentExtent.width << ", " << capabilities.currentExtent.height << "}\n";
+        std::cout << "\t\tMin Extents: {" << capabilities.minImageExtent.width << ", " << capabilities.minImageExtent.height << "}\n";
+        std::cout << "\t\tMax Extents: {" << capabilities.maxImageExtent.width << ", " << capabilities.maxImageExtent.height << "}\n";
+        std::cout << "\t\tMax Image Array Layers: " << capabilities.maxImageArrayLayers << "\n";
+        std::cout << "\t\tSupported Transforms: ...\n";
+        std::cout << "\t\tCurrent Transforms: ...\n";
+        std::cout << "\t\tComposite Alpha: ...\n";
+        std::cout << "\t\tUsage Flags: ...\n";
+        std::cout << "\tSwap Chain Formats: ...\n";
+        std::cout << "\tSwap Chain Present Modes: ...\n";
+    }
+};
+
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentFamily;
+
+    bool isValid() {
+        return graphicsFamily.has_value() && presentFamily.has_value();
+    }
+};
 
 void printDevice(
-    int index, 
-    VkPhysicalDeviceProperties properties,
-    VkPhysicalDeviceFeatures features) {
+    const VkPhysicalDeviceProperties properties,
+    const VkPhysicalDeviceFeatures features) {
 
-    std::cout << "Device [" << index << "]\n";
     std::cout << "\t" << "API Version: " << properties.apiVersion << "\n";
     std::cout << "\t" << "Driver Version: " << properties.driverVersion << "\n";
     std::cout << "\t" << "Vendor ID: " << properties.vendorID << "\n";
@@ -90,9 +119,9 @@ void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& create
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
                                  VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
-                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | 
+                                 // VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | 
                                  VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT    | 
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT   | 
                             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
                             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
